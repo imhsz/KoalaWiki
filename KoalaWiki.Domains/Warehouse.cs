@@ -83,4 +83,9 @@ public class Warehouse : Entity<string>
     /// OpenAI 端点
     /// </summary>
     public string OpenAIEndpoint { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 解析进度 0~100
+    /// </summary>
+    public int Progress { get; set; } = 0;
 }

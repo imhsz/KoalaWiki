@@ -1,4 +1,4 @@
-import { Card, Tag, Typography, Space, Badge, Tooltip, Avatar } from 'antd';
+import { Card, Tag, Typography, Space, Badge, Tooltip, Avatar, Spin, Progress } from 'antd';
 import { Repository } from '../types';
 import Link from 'next/link';
 import { 
@@ -169,6 +169,15 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({ repository }) => {
             </Text>
           </Tooltip>
         </div>
+        
+        {repository.status === 1 && (
+          <div style={{ margin: '16px 0', textAlign: 'center' }}>
+            <Spin tip="正在解析仓库..." />
+            {typeof repository.progress === 'number' && (
+              <Progress percent={repository.progress} size="small" style={{ marginTop: 8 }} />
+            )}
+          </div>
+        )}
       </Card>
     </Link>
   );

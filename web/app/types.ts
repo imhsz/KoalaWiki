@@ -23,6 +23,7 @@ export interface Repository {
   createdAt: string;
   updatedAt?: string;
   error?:string;
+  progress?: number;
 }
 
 export interface RepositoryFormValues {

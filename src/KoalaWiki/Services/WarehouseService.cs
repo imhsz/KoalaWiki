@@ -41,7 +41,8 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
             query.Description,
             query.Version,
             query.Status,
-            query.Error
+            query.Error,
+            query.Progress
         };
     }
 
@@ -161,11 +162,11 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
     public async Task<PageDto<Warehouse>> GetWarehouseListAsync(int page, int pageSize)
     {
         var query = access.Warehouses
-            .AsNoTracking()
-            .Where(x => x.Status == WarehouseStatus.Completed);
+            .AsNoTracking();
 
         var total = await query.CountAsync();
         var list = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

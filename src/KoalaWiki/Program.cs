@@ -6,6 +6,7 @@ using KoalaWiki.Provider.Sqlite;
 using Mapster;
 using Scalar.AspNetCore;
 using Serilog;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,8 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<IKoalaWikiContext>();
     await dbContext.RunMigrateAsync();
 }
+
+Console.WriteLine($"[DEBUG] Constant.GitPath = {KoalaWiki.Constant.GitPath}");
 
 app.UseCors("AllowAll");
 if (app.Environment.IsDevelopment())

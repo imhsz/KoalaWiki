@@ -41,6 +41,10 @@ public class WarehouseTask(
             try
             {
                 // 先拉取仓库
+                await dbContext!.Warehouses.Where(x => x.Id == value.Id)
+                    .ExecuteUpdateAsync(x => x.SetProperty(a => a.Status, WarehouseStatus.Processing)
+                        .SetProperty(a => a.Progress, 10), stoppingToken);
+
                 var info = gitService.PullRepository(value.Address, value?.GitUserName ?? string.Empty,
                     value?.GitPassword ?? string.Empty, value?.Email ?? string.Empty);
 
@@ -48,7 +52,8 @@ public class WarehouseTask(
                     .ExecuteUpdateAsync(x => x.SetProperty(a => a.Name, info.RepositoryName)
                         .SetProperty(x => x.Branch, info.BranchName)
                         .SetProperty(x => x.Version, info.Version)
-                        .SetProperty(x => x.OrganizationName, info.Organization), stoppingToken);
+                        .SetProperty(x => x.OrganizationName, info.Organization)
+                        .SetProperty(x => x.Progress, 30), stoppingToken);
 
                 var document = new Document()
                 {
@@ -66,12 +71,17 @@ public class WarehouseTask(
 
                 await dbContext.SaveChangesAsync(stoppingToken);
 
+                // 处理中...
+                await dbContext!.Warehouses.Where(x => x.Id == value.Id)
+                    .ExecuteUpdateAsync(x => x.SetProperty(a => a.Progress, 60), stoppingToken);
+
                 await documentsService.HandleAsync(document, value, dbContext, value.Address);
 
                 // 更新仓库状态
                 await dbContext.Warehouses.Where(x => x.Id == value.Id)
                     .ExecuteUpdateAsync(x => x.SetProperty(a => a.Status, WarehouseStatus.Completed)
-                        .SetProperty(x => x.Error, string.Empty), stoppingToken);
+                        .SetProperty(x => x.Error, string.Empty)
+                        .SetProperty(x => x.Progress, 100), stoppingToken);
 
                 // 提交更改
                 await dbContext.Documents.Where(x => x.Id == document.Id)

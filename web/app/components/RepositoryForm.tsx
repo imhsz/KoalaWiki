@@ -114,7 +114,7 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
         initialValues={{
           type: 'git',
           branch: 'main',
-          openAIEndpoint: 'https://api.token-ai.cn/v1',
+          openAIEndpoint: 'http://localhost:1234/v1',
           enableGitAuth: false,
         }}
       >
@@ -189,16 +189,16 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
           <Select
             options={[
               {
-                label: 'gpt-4.1',
-                value: 'gpt-4.1',
+                label: 'qwen3-30b-a3b-mlx',
+                value: 'qwen3-30b-a3b-mlx',
               },
               {
-                label: 'gpt-4o',
-                value: 'gpt-4o',
+                label: 'qwen3-32b-mlx',
+                value: 'qwen3-32b-mlx',
               },
               {
-                label: 'gpt-4o-mini',
-                value: 'gpt-4o-mini',
+                label: 'gemma-3-27B-it-qat-GGUF/gemma-3-27B-it-QAT-Q4_0.gguf',
+                value: 'gemma-3-27B-it-qat-GGUF/gemma-3-27B-it-QAT-Q4_0.gguf',
               },
               {
                 label: 'gpt-4.1-mini',
@@ -224,6 +224,7 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
                 label: 'DeepSeek-V3',
                 value: 'DeepSeek-V3',
               },
+
             ]}
           >
           </Select>
