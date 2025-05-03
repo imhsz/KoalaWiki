@@ -4,11 +4,13 @@ import { Suspense, useEffect, useState } from 'react';
 import { getWarehouseOverview } from '../../services';
 import { RepositoryView } from './RepositoryView';
 import { ServerLoadingErrorState } from '../../components/document/ServerComponents';
+import { useParams } from 'next/navigation';
 
-export default function RepositoryPage({ params }: any) {
+export default function RepositoryPage() {
+  const params = useParams();
+  const owner = Array.isArray(params.owner) ? params.owner[0] : params.owner;
+  const name = Array.isArray(params.name) ? params.name[0] : params.name;
   try {
-    const { owner, name } = params;
-    
     if (!owner || !name) {
       throw new Error('Missing owner or repository name');
     }
