@@ -27,6 +27,12 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
             warehouse.Branch = input.Branch;
         }
         
+        // 如果有描述信息则更新
+        if (!string.IsNullOrEmpty(input.Description))
+        {
+            warehouse.Description = input.Description;
+        }
+        
         access.Warehouses.Update(warehouse);
         await access.SaveChangesAsync();
         
@@ -117,7 +123,9 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
             {
                 Id = id,
                 Address = input.Address,
-                Model = input.Model
+                Model = input.Model,
+                // 设置Description字段的默认值，避免NOT NULL约束失败
+                Description = input.Description ?? $"Repository from {input.Address}"
             };
 
             // 使用GitService解析仓库信息
@@ -136,6 +144,12 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
             {
                 warehouse.Branch = "main"; // 默认分支为main
             }
+
+            // 设置其他必填字段的默认值
+            warehouse.Error = string.Empty;
+            warehouse.Prompt = string.Empty;
+            warehouse.Version = "1.0.0";
+            warehouse.Type = input.Type ?? "git";
 
             await access.Warehouses.AddAsync(warehouse);
             await access.SaveChangesAsync();

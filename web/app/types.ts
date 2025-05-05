@@ -28,10 +28,14 @@ export interface Repository {
 
 export interface RepositoryFormValues {
   address: string;
+  description?: string;
   type: string;
   branch: string;
-  prompt: string;
+  prompt?: string;
   model: string;
   openAIKey: string;
   openAIEndpoint: string;
+  gitUserName?: string;
+  gitPassword?: string;
+  email?: string;
 } 

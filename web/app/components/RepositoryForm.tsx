@@ -156,6 +156,17 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
         </Form.Item>
 
         <Form.Item
+          name="description"
+          label="仓库描述"
+          rules={[{ required: false, message: '请输入仓库描述' }]}
+        >
+          <Input.TextArea
+            placeholder="请输入仓库描述（可选）"
+            autoSize={{ minRows: 2, maxRows: 4 }}
+          />
+        </Form.Item>
+
+        <Form.Item
           name="enableGitAuth"
           label="启用私有化Git验证"
           valuePropName="checked"

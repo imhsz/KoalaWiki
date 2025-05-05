@@ -47,4 +47,9 @@ public class WarehouseInput
     /// 分支名称
     /// </summary>
     public string? Branch { get; set; } = "main";
+    
+    /// <summary>
+    /// 仓库描述
+    /// </summary>
+    public string? Description { get; set; }
 }
