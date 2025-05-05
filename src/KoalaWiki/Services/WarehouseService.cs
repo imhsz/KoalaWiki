@@ -2,15 +2,37 @@
 using KoalaWiki.Core.DataAccess;
 using KoalaWiki.Dto;
 using KoalaWiki.Entities;
+using KoalaWiki.Git;
 using KoalaWiki.KoalaWarehouse;
 using LibGit2Sharp;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace KoalaWiki.Services;
 
-public class WarehouseService(IKoalaWikiContext access, IMapper mapper, WarehouseStore warehouseStore) : FastApi
+public class WarehouseService(IKoalaWikiContext access, IMapper mapper, WarehouseStore warehouseStore, ILogger<WarehouseService> logger) : FastApi
 {
+    /// <summary>
+    /// 更新仓库信息
+    /// </summary>
+    private async Task UpdateWarehouseAsync(WarehouseInput input, Warehouse warehouse, HttpContext context)
+    {
+        warehouse.Address = input.Address;
+        warehouse.Model = input.Model;
+        warehouse.Status = WarehouseStatus.Pending;
+        
+        if (!string.IsNullOrEmpty(input.Branch))
+        {
+            warehouse.Branch = input.Branch;
+        }
+        
+        access.Warehouses.Update(warehouse);
+        await access.SaveChangesAsync();
+        
+        await context.Response.WriteAsJsonAsync(new { message = "仓库已更新，等待处理" });
+    }
+
     /// <summary>
     /// 查询上次提交的仓库
     /// </summary>
@@ -73,53 +95,66 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
     {
         try
         {
-            if (!input.Address.EndsWith(".git"))
+            // 检查仓库类型
+            bool isLocalRepository = input.Type?.ToLower() == "local";
+
+            // 对于非本地仓库，确保地址以.git结尾
+            if (!isLocalRepository && !input.Address.EndsWith(".git"))
             {
                 input.Address += ".git";
             }
 
-            var value = await access.Warehouses.FirstOrDefaultAsync(x => x.Address == input.Address);
-            // 判断这个仓库是否已经添加
-            if (value?.Status is WarehouseStatus.Completed or WarehouseStatus.Pending or WarehouseStatus.Processing)
-
+            // 根据仓库地址检查是否已存在
+            var warehouse = await access.Warehouses.FirstOrDefaultAsync(x => x.Address == input.Address);
+            if (warehouse != null)
             {
-                throw new Exception("存在相同名称的渠道");
+                await UpdateWarehouseAsync(input, warehouse, context);
+                return;
             }
 
-            // 删除旧的仓库
-            var oldWarehouse = await access.Warehouses
-                .Where(x => x.Address == input.Address)
-                .ExecuteDeleteAsync();
+            var id = Guid.NewGuid().ToString("N");
+            warehouse = new Warehouse
+            {
+                Id = id,
+                Address = input.Address,
+                Model = input.Model
+            };
 
-            var entity = mapper.Map<Warehouse>(input);
-            entity.Name = string.Empty;
-            entity.Description = string.Empty;
-            entity.Version = string.Empty;
-            entity.Error = string.Empty;
-            entity.Prompt = string.Empty;
-            entity.Branch = string.Empty;
-            entity.Type = "git";
-            entity.CreatedAt = DateTime.UtcNow;
+            // 使用GitService解析仓库信息
+            GitService gitService = new GitService();
+            var (repoPath, orgName) = gitService.GetRepositoryPath(input.Address);
+            warehouse.Name = Path.GetFileNameWithoutExtension(input.Address);
+            warehouse.OrganizationName = orgName;
+            warehouse.Status = WarehouseStatus.Pending;
 
-            entity.Id = Guid.NewGuid().ToString();
-            await access.Warehouses.AddAsync(entity);
+            // 设置分支信息
+            if (!string.IsNullOrEmpty(input.Branch))
+            {
+                warehouse.Branch = input.Branch;
+            }
+            else
+            {
+                warehouse.Branch = "main"; // 默认分支为main
+            }
 
+            await access.Warehouses.AddAsync(warehouse);
             await access.SaveChangesAsync();
 
-            await warehouseStore.WriteAsync(entity);
-
+            // 返回响应
             await context.Response.WriteAsJsonAsync(new
             {
-                code = 200,
-                message = "提交成功"
+                Id = warehouse.Id,
+                Name = warehouse.Name,
+                Organization = warehouse.OrganizationName,
+                Status = warehouse.Status
             });
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "submit warehouse error");
             await context.Response.WriteAsJsonAsync(new
             {
-                code = 500,
-                message = e.Message
+                error = ex.Message
             });
         }
     }

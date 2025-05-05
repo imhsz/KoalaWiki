@@ -1,0 +1,129 @@
+{
+  "name": "koalawiki-vscode",
+  "displayName": "KoalaWiki",
+  "description": "KoalaWiki VSCode插件 - AI驱动的代码知识库",
+  "version": "0.1.0",
+  "publisher": "aidotnet",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AIDotNet/koalawiki"
+  },
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:koalawiki.addRepository",
+    "onCommand:koalawiki.openWiki",
+    "onCommand:koalawiki.analyzeCurrentProject",
+    "onView:koalaWikiRepositories"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "koalawiki.addRepository",
+        "title": "添加到KoalaWiki",
+        "category": "KoalaWiki"
+      },
+      {
+        "command": "koalawiki.openWiki",
+        "title": "打开KoalaWiki",
+        "category": "KoalaWiki"
+      },
+      {
+        "command": "koalawiki.analyzeCurrentProject",
+        "title": "分析当前项目",
+        "category": "KoalaWiki"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "koalawiki-explorer",
+          "title": "KoalaWiki",
+          "icon": "resources/koalawiki.png"
+        }
+      ]
+    },
+    "views": {
+      "koalawiki-explorer": [
+        {
+          "id": "koalaWikiRepositories",
+          "name": "知识库"
+        }
+      ]
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "koalawiki.addRepository",
+          "group": "KoalaWiki",
+          "when": "explorerResourceIsFolder"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "koalawiki.openWiki",
+          "when": "view == koalaWikiRepositories",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "KoalaWiki",
+      "properties": {
+        "koalawiki.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:5000",
+          "description": "KoalaWiki服务器URL"
+        },
+        "koalawiki.aiModel": {
+          "type": "string",
+          "default": "gpt-4.1",
+          "enum": ["gpt-4.1", "gpt-4o", "gpt-4-turbo"],
+          "description": "使用的AI模型"
+        },
+        "koalawiki.openAIKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API密钥"
+        },
+        "koalawiki.openAIEndpoint": {
+          "type": "string",
+          "default": "https://api.openai.com",
+          "description": "OpenAI API端点"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.70.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "@vscode/test-electron": "^2.3.4",
+    "eslint": "^8.47.0",
+    "glob": "^8.1.0",
+    "minimatch": "^3.1.2",
+    "mocha": "^10.2.0",
+    "typescript": "^5.1.6",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "axios": "^1.4.0"
+  }
+} 

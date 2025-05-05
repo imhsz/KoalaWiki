@@ -12,15 +12,17 @@ KoalaWiki 是一个强大的AI驱动代码知识库平台，可以自动分析�
 ## ✨ 核心功能
 
 - **仓库管理**：支持添加和管理多个Git代码仓库
+- **本地仓库支持**：分析本地文件夹代码，无需Git仓库
 - **AI代码分析**：利用先进的AI技术分析代码结构和关系
 - **自动文档生成**：自动为代码库生成详细的文档
 - **知识库导航**：直观的目录树结构，便于浏览和查找
 - **支持多种模型**：集成OpenAI等多种AI模型，灵活配置
+- **VSCode插件**：提供VSCode插件便捷使用
 
 ## 🔧 技术栈
 
 ### 后端
-- .NET 9.0
+- .NET 8.0/9.0
 - Microsoft Semantic Kernel
 - Entity Framework Core
 - FastService API
@@ -34,55 +36,108 @@ KoalaWiki 是一个强大的AI驱动代码知识库平台，可以自动分析�
 - TypeScript
 - Markdown 渲染支持
 
+### VSCode 插件
+- TypeScript
+- VSCode Extension API
+- Axios
+
 ## 🚀 快速开始
 
 ### 系统要求
-- .NET 9.0 SDK
-- Node.js 18+
+- .NET 8.0 SDK 或更高版本
+- Node.js 18+ 和 npm/yarn
+- Git
 
-### 后端安装
+### 安装步骤
+
+1. **安装.NET SDK**
+   ```
+   # 从 https://dotnet.microsoft.com/download/dotnet/8.0 下载.NET 8.0 SDK
+   # 安装后，验证安装
+   dotnet --version
+   ```
+
+2. **克隆项目**
+   ```
+   git clone https://github.com/yourusername/koalawiki.git
+   cd koalawiki
+   ```
+
+3. **运行后端**
+   ```
+   cd src/KoalaWiki
+   dotnet run
+   ```
+
+4. **运行前端**
+   ```
+   cd web
+   npm install
+   npm run dev
+   ```
+
+5. **VSCode插件打包**
+   ```
+   cd vscode-extension
+   npm install
+   npm run package
+   ```
+   打包后的.vsix文件可在插件目录中找到，可通过VSCode的"从VSIX安装..."功能安装。
+
+## 💡 使用指南
+
+### 添加仓库
+
+1. 通过Web界面添加Git仓库
+2. 使用VSCode插件添加本地仓库
+3. 支持私有仓库（需填写凭据）
+
+### 访问知识库
+
+1. 打开Web界面浏览仓库内容
+2. 通过VSCode插件直接访问
+
+## 🔄 提交Git和打包插件
+
+### 提交Git
+
 ```bash
-# 克隆仓库
-git clone https://github.com/AIDotNet/koalawiki.git
-cd koalawiki
+# 添加所有更改
+git add .
 
-# 启动后端API
-cd src/KoalaWiki
-dotnet run
+# 提交更改
+git commit -m "你的提交信息"
+
+# 推送到远程仓库
+git push origin main
 ```
 
-### 前端安装
+### 打包VSCode插件
+
 ```bash
-# 进入前端目录
-cd web
+# 进入插件目录
+cd vscode-extension
 
 # 安装依赖
 npm install
 
-# 启动开发服务器
-npm run dev
+# 编译TypeScript
+npm run compile
+
+# 打包插件
+npm run package
+
+# 或者使用打包脚本
+node scripts/package.js
 ```
 
-应用将在 http://localhost:3000 启动。
+## 🤝 贡献指南
 
-## 🖥️ 使用说明
+欢迎贡献代码、报告问题或提出改进建议！
 
-1. **添加仓库**：点击"添加新仓库"按钮，填写Git仓库地址、分支等信息
-2. **配置AI模型**：选择合适的AI模型和配置参数 
-3. **浏览知识库**：仓库分析完成后，可通过导航树浏览代码文档
-4. **查看代码解析**：查看AI生成的代码结构分析和文档说明
+## 📝 许可证
 
-## 🤝 参与贡献
-
-欢迎参与KoalaWiki项目的开发！您可以通过以下方式贡献：
-
-1. 提交Issue报告问题或建议新功能
-2. 提交Pull Request贡献代码
-3. 改进文档和用户指南
-
-## 📄 许可证
-
-本项目采用 [MIT 许可证](LICENSE)。
+[MIT](LICENSE)
 
 ## 📚 相关资源
 

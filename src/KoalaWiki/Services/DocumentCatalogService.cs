@@ -80,6 +80,11 @@ public class DocumentCatalogService(IKoalaWikiContext dbAccess) : FastApi
             .Where(x => x.Name == name && x.OrganizationName == owner)
             .FirstOrDefaultAsync();
 
+        if (query == null)
+        {
+            throw new NotFoundException("仓库不存在");
+        }
+
         // 找到catalog
         var id = await dbAccess.DocumentCatalogs
             .AsNoTracking()
@@ -107,8 +112,8 @@ public class DocumentCatalogService(IKoalaWikiContext dbAccess) : FastApi
             content = item.Content,
             title = item.Title,
             fileSource,
-            address = query?.Address.Replace(".git", string.Empty),
-            query?.Branch,
+            address = query.Address.Replace(".git", string.Empty),
+            branch = query.Branch,
         });
     }
 

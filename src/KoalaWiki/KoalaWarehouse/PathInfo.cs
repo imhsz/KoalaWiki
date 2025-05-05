@@ -2,9 +2,9 @@
 
 public class PathInfo
 {
-    public string Path { get; set; }
+    public required string Path { get; set; }
 
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
-    public string Type { get; set; }
+    public required string Type { get; set; }
 }

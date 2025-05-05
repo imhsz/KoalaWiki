@@ -11,7 +11,10 @@ public class DocumentContext
         {
             _documentHolder.Value ??= new DocumentHolder();
 
-            _documentHolder.Value.DocumentStore = value;
+            if (value != null)
+            {
+                _documentHolder.Value.DocumentStore = value;
+            }
         }
     }
 

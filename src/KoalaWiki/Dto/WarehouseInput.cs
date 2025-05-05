@@ -6,7 +6,7 @@ public class WarehouseInput
     /// 仓库地址
     /// </summary>
     /// <returns></returns>
-    public string Address { get; set; }
+    public required string Address { get; set; }
 
     /// <summary>
     /// 使用模型
@@ -37,4 +37,14 @@ public class WarehouseInput
     ///  私有化git邮箱
     /// </summary>
     public string? Email { get; set; }
+    
+    /// <summary>
+    /// 仓库类型（"git"或"local"）
+    /// </summary>
+    public string? Type { get; set; } = "git";
+    
+    /// <summary>
+    /// 分支名称
+    /// </summary>
+    public string? Branch { get; set; } = "main";
 }
