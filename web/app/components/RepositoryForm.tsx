@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { RepositoryFormValues } from '../types';
 import { submitWarehouse } from '../services';
 import { fetchOpenAIModels } from '../services/openaiService';
+import { ReloadOutlined } from '@ant-design/icons';
 
 interface RepositoryFormProps {
   open: boolean;
@@ -20,6 +21,7 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
   const [modelsFetching, setModelsFetching] = useState(false);
   const [models, setModels] = useState<string[]>([]);
   const [enableGitAuth, setEnableGitAuth] = useState(false);
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   // 当 API 密钥或端点变更时，尝试获取模型列表
   const handleApiConfigChange = async () => {
@@ -72,13 +74,39 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
     }
   };
 
+  // 使用防抖处理表单值变化
+  const handleFormValuesChange = (changedValues: any) => {
+    // 当OpenAI配置字段变化时尝试刷新模型列表
+    if ('openAIEndpoint' in changedValues || 'openAIKey' in changedValues) {
+      // 清除之前的定时器
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      const endpoint = form.getFieldValue('openAIEndpoint');
+      const apiKey = form.getFieldValue('openAIKey');
+      
+      if (endpoint && apiKey) {
+        // 延迟600ms后请求，减少API调用频率
+        const timer = setTimeout(() => {
+          handleApiConfigChange();
+        }, 600);
+        
+        setDebounceTimer(timer);
+      }
+    }
+  };
+
   // 重置表单时清空模型列表
   useEffect(() => {
     if (!open) {
       setModels([]);
       setEnableGitAuth(false);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
     }
-  }, [open]);
+  }, [open, debounceTimer]);
 
   const handleGitAuthChange = (checked: boolean) => {
     setEnableGitAuth(checked);
@@ -117,6 +145,7 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
           openAIEndpoint: 'http://localhost:1234/v1',
           enableGitAuth: false,
         }}
+        onValuesChange={handleFormValuesChange}
       >
         <Form.Item
           name="address"
@@ -169,8 +198,7 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
           name="openAIEndpoint"
           label="OpenAI 端点"
         >
-          <Input
-            placeholder="请输入 OpenAI 端点" />
+          <Input placeholder="请输入 OpenAI 端点" />
         </Form.Item>
 
         <Form.Item
@@ -183,51 +211,46 @@ const RepositoryForm: React.FC<RepositoryFormProps> = ({
 
         <Form.Item
           name="model"
-          label="使用模型"
+          label={
+            <Space>
+              使用模型
+              <Button
+                type="link"
+                icon={<ReloadOutlined />}
+                loading={modelsFetching}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleApiConfigChange();
+                }}
+                size="small"
+                style={{ marginLeft: 4, padding: '0 4px' }}
+              >
+                刷新
+              </Button>
+            </Space>
+          }
           rules={[{ required: true, message: '请选择使用的模型' }]}
+          extra={modelsFetching ? <Spin size="small" /> : null}
         >
           <Select
-            options={[
-              {
-                label: 'qwen3-30b-a3b-mlx',
-                value: 'qwen3-30b-a3b-mlx',
-              },
-              {
-                label: 'qwen3-32b-mlx',
-                value: 'qwen3-32b-mlx',
-              },
-              {
-                label: 'gemma-3-27B-it-qat-GGUF/gemma-3-27B-it-QAT-Q4_0.gguf',
-                value: 'gemma-3-27B-it-qat-GGUF/gemma-3-27B-it-QAT-Q4_0.gguf',
-              },
-              {
-                label: 'gpt-4.1-mini',
-                value: 'gpt-4.1-mini',
-              },
-              {
-                label: 'QwQ-32B',
-                value: 'QwQ-32B',
-              },
-              {
-                label: 'o4-mini',
-                value: 'o4-mini',
-              },
-              {
-                label: 'o3-mini',
-                value: 'o3-mini',
-              },
-              {
-                label: 'doubao-1-5-pro-256k-250115',
-                value: 'doubao-1-5-pro-256k-250115',
-              },
-              {
-                label: 'DeepSeek-V3',
-                value: 'DeepSeek-V3',
-              },
-
-            ]}
-          >
-          </Select>
+            loading={modelsFetching}
+            placeholder={modelsFetching ? "正在加载模型列表..." : "请选择模型"}
+            options={
+              models.length > 0
+                ? models.map(model => ({ label: model, value: model }))
+                : [
+                    { label: 'qwen3-30b-a3b-mlx', value: 'qwen3-30b-a3b-mlx' },
+                    { label: 'qwen3-32b-mlx', value: 'qwen3-32b-mlx' },
+                    { label: 'gemma-3-27B-it-qat-GGUF/gemma-3-27B-it-QAT-Q4_0.gguf', value: 'gemma-3-27B-it-qat-GGUF/gemma-3-27B-it-QAT-Q4_0.gguf' },
+                    { label: 'gpt-4.1-mini', value: 'gpt-4.1-mini' },
+                    { label: 'QwQ-32B', value: 'QwQ-32B' },
+                    { label: 'o4-mini', value: 'o4-mini' },
+                    { label: 'o3-mini', value: 'o3-mini' },
+                    { label: 'doubao-1-5-pro-256k-250115', value: 'doubao-1-5-pro-256k-250115' },
+                    { label: 'DeepSeek-V3', value: 'DeepSeek-V3' }
+                  ]
+            }
+          />
         </Form.Item>
       </Form>
     </Modal>
