@@ -10,15 +10,35 @@ public class GitService
         // 检查是否为本地路径
         if (Path.IsPathRooted(repositoryUrl) || repositoryUrl.StartsWith("./") || repositoryUrl.StartsWith("../"))
         {
-            // 如果是本地路径，直接使用该路径作为仓库路径
-            var directoryInfo = new DirectoryInfo(repositoryUrl);
-            var repositoryName = directoryInfo.Name;
-            var orgName = directoryInfo.Parent?.Name ?? "local";
-            
-            // 对于本地仓库，我们可以选择复制到统一的仓库管理目录下，或直接使用原路径
-            // 这里选择复制到统一管理目录
-            var localRepoPath = Path.Combine(Constant.GitPath, orgName, repositoryName);
-            return (localRepoPath, orgName);
+            try
+            {
+                // 如果是本地路径，直接使用该路径作为仓库路径
+                var directoryInfo = new DirectoryInfo(repositoryUrl);
+                var repositoryName = directoryInfo.Name;
+                // 处理Windows驱动器路径情况
+                var parentDir = directoryInfo.Parent;
+                string orgName;
+                
+                // 特殊处理Windows驱动器路径
+                if (parentDir == null || parentDir.Name.EndsWith(":"))
+                {
+                    orgName = "local";
+                }
+                else
+                {
+                    orgName = parentDir.Name;
+                }
+                
+                // 对于本地仓库，我们可以选择复制到统一的仓库管理目录下，或直接使用原路径
+                // 这里选择复制到统一管理目录
+                var localRepoPath = Path.Combine(Constant.GitPath, orgName, repositoryName);
+                return (localRepoPath, orgName);
+            }
+            catch (Exception)
+            {
+                // 如果路径无效或访问出错，返回默认值
+                return (Path.Combine(Constant.GitPath, "local", Path.GetFileName(repositoryUrl) ?? "unknown"), "local");
+            }
         }
         
         // 解析远程仓库地址

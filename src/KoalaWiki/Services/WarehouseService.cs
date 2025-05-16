@@ -4,6 +4,7 @@ using KoalaWiki.Dto;
 using KoalaWiki.Entities;
 using KoalaWiki.Git;
 using KoalaWiki.KoalaWarehouse;
+using KoalaWiki.Utils;
 using LibGit2Sharp;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -76,6 +77,9 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
 
     public async Task<DocumentCommitRecord?> GetChangeLogAsync(string owner, string name)
     {
+        // 使用PathUtils处理Windows路径
+        (owner, name) = PathUtils.NormalizePathForRepository(owner, name);
+
         var warehouse = await access.Warehouses
             .AsNoTracking()
             .Where(x => x.Name == name && x.OrganizationName == owner)
@@ -178,6 +182,9 @@ public class WarehouseService(IKoalaWikiContext access, IMapper mapper, Warehous
     /// </summary>
     public async Task GetWarehouseOverviewAsync(string owner, string name, HttpContext context)
     {
+        // 使用PathUtils处理Windows路径
+        (owner, name) = PathUtils.NormalizePathForRepository(owner, name);
+
         var query = await access.Warehouses
             .AsNoTracking()
             .Where(x => x.Name == name && x.OrganizationName == owner)

@@ -1,8 +1,10 @@
 ﻿using FastService;
 using KoalaWiki.Core.DataAccess;
 using KoalaWiki.Entities;
+using KoalaWiki.Utils;
 using LibGit2Sharp;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace KoalaWiki.Services;
 
@@ -17,6 +19,9 @@ public class DocumentCatalogService(IKoalaWikiContext dbAccess) : FastApi
     /// <exception cref="NotFoundException"></exception>
     public async Task<object> GetDocumentCatalogsAsync(string organizationName, string name)
     {
+        // 使用PathUtils处理Windows路径
+        (organizationName, name) = PathUtils.NormalizePathForRepository(organizationName, name);
+
         var warehouse = await dbAccess.Warehouses
             .AsNoTracking()
             .Where(x => x.Name == name && x.OrganizationName == organizationName)
@@ -74,6 +79,9 @@ public class DocumentCatalogService(IKoalaWikiContext dbAccess) : FastApi
     /// <returns></returns>
     public async Task GetDocumentByIdAsync(HttpContext httpContext, string owner, string name, string path)
     {
+        // 使用PathUtils处理Windows路径
+        (owner, name) = PathUtils.NormalizePathForRepository(owner, name);
+
         // 先根据仓库名称和组织名称找到仓库
         var query = await dbAccess.Warehouses
             .AsNoTracking()

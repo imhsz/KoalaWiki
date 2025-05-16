@@ -81,9 +81,14 @@ export default function RepositoryLayout({
   const { token } = theme.useToken();
 
   const pathParts = pathname.split('/').filter(Boolean);
-  const owner = params.owner || pathParts[0] || '';
-  const name = params.name || pathParts[1] || '';
+  const [owner, setOwner] = useState(pathParts[0] || '');
+  const [name, setName] = useState(pathParts[1] || '');
   const currentPath = pathParts.slice(2).join('/');
+
+  useEffect(() => {
+    if (params.owner) setOwner(params.owner);
+    if (params.name) setName(params.name);
+  }, [params.owner, params.name]);
 
   const [catalogData, setCatalogData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
